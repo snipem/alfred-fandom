@@ -5,6 +5,7 @@ if [[ -z "${lang}" ]]; then
     lang="en"
 fi
 
-http "https://community.fandom.com/api/v1/Wikis/ByString?string=$query&lang=$lang%2Cde&limit=25&expand=1&batch=1&includeDomain=true" |
-jq \
-'{ "items" : [ .items[] | select(.wam_score > 0) | {uid: .id, title: .name, arg: .domain, subtitle: (.topic + " " + .domain + " " + .language + " " + (.wam_score|tostring)) }] }'
+/usr/local/bin/http --follow "https://community.fandom.com/wiki/Special:SearchCommunity?query=$query&resultsLang=$lang" |
+    /usr/local/bin/pup ".unified-search__result__community__thumbnail > a json{}" |
+    /usr/local/bin/jq '{ "items" : [ .[] | {uid: .href, title: .children[0].alt, arg: .href, subtitle: .href }] }'
+
